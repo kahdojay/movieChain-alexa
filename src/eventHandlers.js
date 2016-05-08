@@ -20,27 +20,20 @@ var registerEventHandlers = function (eventHandlers, skillContext) {
     };
 
     eventHandlers.onLaunch = function (launchRequest, session, response) {
-        //Speak welcome message and ask user questions
-        //based on whether there are players or not.
         storage.loadGame(session, function (currentGame) {
-            var speechOutput = '',
-                reprompt;
-            if (currentGame.data.players.length === 0) {
-                speechOutput += 'Movie Chain Game, Let\'s start your game. Who\'s your first player?';
-                reprompt = "Please tell me who is your first player?";
-            } else if (currentGame.isEmptyScore()) {
-                speechOutput += 'Movie Chain Game, '
-                    + 'you have ' + currentGame.data.players.length + ' player';
-                if (currentGame.data.players.length > 1) {
-                    speechOutput += 's';
-                }
-                speechOutput += ' in the game. You can give a player points, add another player, reset all players or exit. Which would you like?';
-                reprompt = textHelper.completeHelp;
-            } else {
-                speechOutput += 'Movie Chain Game, What can I do for you?';
-                reprompt = textHelper.nextHelp;
-            }
-            response.ask(speechOutput, reprompt);
+            currentGame.save(function () {
+                var url = ENDPOINT + '/new'
+                var request = require('request')
+                request(url, function (error, res, body) {
+                    if (!error && response.statusCode == 200) {
+                        response.tell('API Error!')
+                    } else {
+                        currentGame.data.currentQuestionType = 'MOVIE'
+                        currentGame.data.currentQuestion = JSON.parse(body).response
+                        response.ask('The actor is ' + currentGame.data.currentQuestion + ', please guess a movie.')
+                    }
+                })
+            });
         });
     };
 };

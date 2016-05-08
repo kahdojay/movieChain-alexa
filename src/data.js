@@ -1,6 +1,6 @@
 var data = {
   'GOOD': ['JOHN', 'MARY'],
-  'BAD': ['DON', 'DAWN']
+  // 'BAD': ['DON', 'DAWN']
 }
 
 module.exports = data
